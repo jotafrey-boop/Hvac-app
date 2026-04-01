@@ -5,26 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Frey Williams HVAC</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e3a8a">
-
 <style>
-body { font-family: Arial; padding: 20px; background:#f5f7fa; }
+body { font-family: Arial; padding: 15px; background:#f5f7fa; }
 .card { background:white; padding:15px; border-radius:10px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
 select, input, button { width:100%; padding:10px; margin-top:5px; }
-button { background:#1e3a8a; color:white; border:none; font-weight:bold; }
-.result { font-size:18px; margin-top:15px; }
-.json { background:#111; color:#0f0; padding:10px; margin-top:10px; font-size:12px; }
+button { background:#1e3a8a; color:white; border:none; font-weight:bold; margin-top:10px;}
+.result { font-size:18px; margin-top:15px; font-weight:bold; text-align:center;}
+.registros { background:white; padding:10px; margin-top:10px; border-radius:10px;}
 </style>
 </head>
 
 <body>
 
-<div style="text-align:center; margin-bottom:15px;">
-  <h2>Frey Williams HVAC</h2>
-</div>
+<h2 style="text-align:center;">Frey Williams HVAC</h2>
 
-<!-- DATOS CLIENTE -->
 <div class="card">
 <label>Nombre Cliente</label>
 <input id="cliente">
@@ -40,115 +34,117 @@ button { background:#1e3a8a; color:white; border:none; font-weight:bold; }
 <input id="telefono">
 </div>
 
-<!-- VARIABLES -->
 <div class="card">
 <label>Interior</label>
-<select id="interior">
-<option value="1">Fácil</option>
-<option value="2">Media</option>
-<option value="3">Difícil</option>
-</select>
+<select id="interior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select>
 </div>
 
 <div class="card">
 <label>Exterior</label>
-<select id="exterior">
-<option value="1">Fácil</option>
-<option value="2">Media</option>
-<option value="3">Difícil</option>
-</select>
+<select id="exterior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select>
 </div>
 
 <div class="card">
 <label>Distancia</label>
-<select id="distancia">
-<option value="1"><3m</option>
-<option value="2">3-5m</option>
-<option value="3">>5m</option>
-</select>
+<select id="distancia"><option value="1"><3m</option><option value="2">3-5m</option><option value="3">>5m</option></select>
 </div>
 
 <div class="card">
 <label>Muro</label>
-<select id="muro">
-<option value="1">Simple</option>
-<option value="2">Hormigón</option>
-<option value="3">Estructural</option>
-</select>
+<select id="muro"><option value="1">Simple</option><option value="2">Hormigón</option><option value="3">Estructural</option></select>
 </div>
 
 <div class="card">
 <label>Electricidad</label>
-<select id="electricidad">
-<option value="1">Lista</option>
-<option value="2">Ajuste</option>
-<option value="3">Nueva</option>
-</select>
+<select id="electricidad"><option value="1">Lista</option><option value="2">Ajuste</option><option value="3">Nueva</option></select>
 </div>
 
 <div class="card">
 <label>Intervención</label>
-<select id="intervencion">
-<option value="1">Baja</option>
-<option value="2">Media</option>
-<option value="3">Alta</option>
-</select>
+<select id="intervencion"><option value="1">Baja</option><option value="2">Media</option><option value="3">Alta</option></select>
 </div>
 
 <button onclick="evaluar()">Evaluar instalación</button>
+<button onclick="verRegistros()">Ver registros</button>
+<button onclick="exportar()">Exportar a Excel</button>
 
 <div class="result" id="resultado"></div>
-<pre class="json" id="json"></pre>
+<div class="registros" id="lista"></div>
 
 <script>
-function evaluar() {
+function evaluar(){
 
 let cliente = document.getElementById("cliente").value;
 let direccion = document.getElementById("direccion").value;
 let telefono = document.getElementById("telefono").value;
 
-let interior = parseInt(document.getElementById("interior").value);
-let exterior = parseInt(document.getElementById("exterior").value);
-let distancia = parseInt(document.getElementById("distancia").value);
-let muro = parseInt(document.getElementById("muro").value);
-let electricidad = parseInt(document.getElementById("electricidad").value);
-let intervencion = parseInt(document.getElementById("intervencion").value);
+let interior = +document.getElementById("interior").value;
+let exterior = +document.getElementById("exterior").value;
+let distancia = +document.getElementById("distancia").value;
+let muro = +document.getElementById("muro").value;
+let electricidad = +document.getElementById("electricidad").value;
+let intervencion = +document.getElementById("intervencion").value;
 
-let score = interior + exterior + distancia + muro + electricidad + intervencion;
+let score = interior+exterior+distancia+muro+electricidad+intervencion;
 
 let clasificacion = "";
 let recomendacion = "";
 
-if(score <= 8){
-    clasificacion = "A";
-    recomendacion = "Tomar";
-}
-else if(score <= 12){
-    clasificacion = "B";
-    recomendacion = "Evaluar";
-}
-else{
-    clasificacion = "C";
-    recomendacion = "Evitar";
-}
+if(score<=8){ clasificacion="A"; recomendacion="Tomar"; }
+else if(score<=12){ clasificacion="B"; recomendacion="Evaluar"; }
+else{ clasificacion="C"; recomendacion="Evitar"; }
 
 document.getElementById("resultado").innerText =
 `Clasificación: ${clasificacion} | Acción: ${recomendacion}`;
 
 let data = {
-    fecha: new Date().toISOString(),
-    cliente,
-    direccion,
-    telefono,
-    clasificacion,
-    score,
-    recomendacion,
-    factores: { interior, exterior, distancia, muro, electricidad, intervencion }
+fecha:new Date().toISOString(),
+cliente,direccion,telefono,
+clasificacion,score,recomendacion
 };
 
-document.getElementById("json").innerText =
-JSON.stringify(data, null, 2);
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+registros.push(data);
+localStorage.setItem("registros", JSON.stringify(registros));
 
+alert("Guardado ✔");
+}
+
+function verRegistros(){
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+let html = "";
+
+registros.slice().reverse().forEach(r=>{
+html += `<div style="border-bottom:1px solid #ddd; padding:5px;">
+<b>${r.cliente}</b><br>
+${r.clasificacion} - ${r.recomendacion}
+</div>`;
+});
+
+document.getElementById("lista").innerHTML = html || "Sin registros";
+}
+
+function exportar(){
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+
+if(registros.length === 0){
+  alert("No hay datos");
+  return;
+}
+
+let csv = "Fecha,Cliente,Direccion,Telefono,Clasificacion,Score,Recomendacion\n";
+
+registros.forEach(r=>{
+  csv += `${r.fecha},${r.cliente},${r.direccion},${r.telefono},${r.clasificacion},${r.score},${r.recomendacion}\n`;
+});
+
+let blob = new Blob([csv], { type: 'text/csv' });
+let url = window.URL.createObjectURL(blob);
+
+let a = document.createElement("a");
+a.href = url;
+a.download = "registros_hvac.csv";
+a.click();
 }
 </script>
 
