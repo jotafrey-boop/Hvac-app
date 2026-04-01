@@ -8,9 +8,9 @@
 <style>
 body { font-family: Arial; padding: 15px; background:#f5f7fa; }
 .card { background:white; padding:15px; border-radius:10px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-select, input, button { width:100%; padding:10px; margin-top:5px; }
+select, input, textarea, button { width:100%; padding:10px; margin-top:5px; }
 button { background:#1e3a8a; color:white; border:none; font-weight:bold; margin-top:10px;}
-.result { font-size:18px; margin-top:15px; font-weight:bold; text-align:center;}
+.result { font-size:16px; margin-top:15px; font-weight:bold; white-space:pre-line;}
 .registros { background:white; padding:10px; margin-top:10px; border-radius:10px;}
 </style>
 </head>
@@ -32,6 +32,16 @@ button { background:#1e3a8a; color:white; border:none; font-weight:bold; margin-
 <div class="card">
 <label>Teléfono</label>
 <input id="telefono">
+</div>
+
+<div class="card">
+<label>Observaciones Cliente</label>
+<textarea id="observaciones"></textarea>
+</div>
+
+<div class="card">
+<label>Observación Técnica</label>
+<textarea id="obs_tecnica"></textarea>
 </div>
 
 <div class="card">
@@ -67,6 +77,7 @@ button { background:#1e3a8a; color:white; border:none; font-weight:bold; margin-
 <button onclick="evaluar()">Evaluar instalación</button>
 <button onclick="verRegistros()">Ver registros</button>
 <button onclick="exportar()">Exportar a Excel</button>
+<button onclick="borrarRegistros()" style="background:#c0392b;">Borrar registros</button>
 
 <div class="result" id="resultado"></div>
 <div class="registros" id="lista"></div>
@@ -77,6 +88,8 @@ function evaluar(){
 let cliente = document.getElementById("cliente").value;
 let direccion = document.getElementById("direccion").value;
 let telefono = document.getElementById("telefono").value;
+let observaciones = document.getElementById("observaciones").value;
+let obs_tecnica = document.getElementById("obs_tecnica").value;
 
 let interior = +document.getElementById("interior").value;
 let exterior = +document.getElementById("exterior").value;
@@ -94,13 +107,49 @@ if(score<=8){ clasificacion="A"; recomendacion="Tomar"; }
 else if(score<=12){ clasificacion="B"; recomendacion="Evaluar"; }
 else{ clasificacion="C"; recomendacion="Evitar"; }
 
-document.getElementById("resultado").innerText =
-`Clasificación: ${clasificacion} | Acción: ${recomendacion}`;
+/* ===== ANALISIS AUTOMATICO ===== */
+let analisis = [];
 
+if(distancia == 3){
+  analisis.push("Distancia alta (>5m) → mayor carga de trabajo");
+}
+
+if(muro == 3){
+  analisis.push("Muro estructural → perforación compleja");
+}
+
+if(electricidad == 3){
+  analisis.push("Instalación eléctrica nueva requerida");
+}
+
+if(interior == 3){
+  analisis.push("Condición interior difícil");
+}
+
+if(exterior == 3){
+  analisis.push("Condición exterior difícil");
+}
+
+if(intervencion == 3){
+  analisis.push("Alta intervención en infraestructura");
+}
+
+/* ===== RESULTADO ===== */
+let textoAnalisis = analisis.length > 0 
+  ? "\n\n" + analisis.map(a => "⚠️ " + a).join("\n")
+  : "";
+
+document.getElementById("resultado").innerText =
+`Clasificación: ${clasificacion} (${score}) | Acción: ${recomendacion}${textoAnalisis}`;
+
+/* ===== GUARDADO ===== */
 let data = {
-fecha:new Date().toISOString(),
+fecha:new Date().toLocaleString(),
 cliente,direccion,telefono,
-clasificacion,score,recomendacion
+observaciones,obs_tecnica,
+interior,exterior,distancia,muro,electricidad,intervencion,
+clasificacion,score,recomendacion,
+analisis: analisis.join(" | ")
 };
 
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
@@ -110,20 +159,29 @@ localStorage.setItem("registros", JSON.stringify(registros));
 alert("Guardado ✔");
 }
 
+/* ===== VER REGISTROS ===== */
 function verRegistros(){
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
+
+if(registros.length === 0){
+  document.getElementById("lista").innerHTML = "Sin registros";
+  return;
+}
+
 let html = "";
 
 registros.slice().reverse().forEach(r=>{
 html += `<div style="border-bottom:1px solid #ddd; padding:5px;">
 <b>${r.cliente}</b><br>
-${r.clasificacion} - ${r.recomendacion}
+${r.clasificacion} (${r.score}) - ${r.recomendacion}<br>
+<i>${r.analisis || ""}</i>
 </div>`;
 });
 
-document.getElementById("lista").innerHTML = html || "Sin registros";
+document.getElementById("lista").innerHTML = html;
 }
 
+/* ===== EXPORTAR ===== */
 function exportar(){
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
 
@@ -132,10 +190,10 @@ if(registros.length === 0){
   return;
 }
 
-let csv = "Fecha,Cliente,Direccion,Telefono,Clasificacion,Score,Recomendacion\n";
+let csv = "Fecha,Cliente,Direccion,Telefono,Obs Cliente,Obs Tecnica,Interior,Exterior,Distancia,Muro,Electricidad,Intervencion,Clasificacion,Score,Recomendacion,Analisis\n";
 
 registros.forEach(r=>{
-  csv += `${r.fecha},${r.cliente},${r.direccion},${r.telefono},${r.clasificacion},${r.score},${r.recomendacion}\n`;
+  csv += `${r.fecha},${r.cliente},${r.direccion},${r.telefono},${r.observaciones},${r.obs_tecnica},${r.interior},${r.exterior},${r.distancia},${r.muro},${r.electricidad},${r.intervencion},${r.clasificacion},${r.score},${r.recomendacion},${r.analisis}\n`;
 });
 
 let blob = new Blob([csv], { type: 'text/csv' });
@@ -145,6 +203,15 @@ let a = document.createElement("a");
 a.href = url;
 a.download = "registros_hvac.csv";
 a.click();
+}
+
+/* ===== BORRAR ===== */
+function borrarRegistros(){
+if(confirm("¿Seguro que quieres borrar todos los registros?")){
+  localStorage.removeItem("registros");
+  document.getElementById("lista").innerHTML = "";
+  alert("Registros eliminados ✔");
+}
 }
 </script>
 
