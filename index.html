@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frey Williams HVAC</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3a8a">
+
+<style>
+body { font-family: Arial; padding: 20px; background:#f5f7fa; }
+.card { background:white; padding:15px; border-radius:10px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+select, input, button { width:100%; padding:10px; margin-top:5px; }
+button { background:#1e3a8a; color:white; border:none; font-weight:bold; }
+.result { font-size:18px; margin-top:15px; }
+.json { background:#111; color:#0f0; padding:10px; margin-top:10px; font-size:12px; }
+</style>
+</head>
+
+<body>
+
+<div style="text-align:center; margin-bottom:15px;">
+  <h2>Frey Williams HVAC</h2>
+</div>
+
+<!-- DATOS CLIENTE -->
+<div class="card">
+<label>Nombre Cliente</label>
+<input id="cliente">
+</div>
+
+<div class="card">
+<label>Dirección</label>
+<input id="direccion">
+</div>
+
+<div class="card">
+<label>Teléfono</label>
+<input id="telefono">
+</div>
+
+<!-- VARIABLES -->
+<div class="card">
+<label>Interior</label>
+<select id="interior">
+<option value="1">Fácil</option>
+<option value="2">Media</option>
+<option value="3">Difícil</option>
+</select>
+</div>
+
+<div class="card">
+<label>Exterior</label>
+<select id="exterior">
+<option value="1">Fácil</option>
+<option value="2">Media</option>
+<option value="3">Difícil</option>
+</select>
+</div>
+
+<div class="card">
+<label>Distancia</label>
+<select id="distancia">
+<option value="1"><3m</option>
+<option value="2">3-5m</option>
+<option value="3">>5m</option>
+</select>
+</div>
+
+<div class="card">
+<label>Muro</label>
+<select id="muro">
+<option value="1">Simple</option>
+<option value="2">Hormigón</option>
+<option value="3">Estructural</option>
+</select>
+</div>
+
+<div class="card">
+<label>Electricidad</label>
+<select id="electricidad">
+<option value="1">Lista</option>
+<option value="2">Ajuste</option>
+<option value="3">Nueva</option>
+</select>
+</div>
+
+<div class="card">
+<label>Intervención</label>
+<select id="intervencion">
+<option value="1">Baja</option>
+<option value="2">Media</option>
+<option value="3">Alta</option>
+</select>
+</div>
+
+<button onclick="evaluar()">Evaluar instalación</button>
+
+<div class="result" id="resultado"></div>
+<pre class="json" id="json"></pre>
+
+<script>
+function evaluar() {
+
+let cliente = document.getElementById("cliente").value;
+let direccion = document.getElementById("direccion").value;
+let telefono = document.getElementById("telefono").value;
+
+let interior = parseInt(document.getElementById("interior").value);
+let exterior = parseInt(document.getElementById("exterior").value);
+let distancia = parseInt(document.getElementById("distancia").value);
+let muro = parseInt(document.getElementById("muro").value);
+let electricidad = parseInt(document.getElementById("electricidad").value);
+let intervencion = parseInt(document.getElementById("intervencion").value);
+
+let score = interior + exterior + distancia + muro + electricidad + intervencion;
+
+let clasificacion = "";
+let recomendacion = "";
+
+if(score <= 8){
+    clasificacion = "A";
+    recomendacion = "Tomar";
+}
+else if(score <= 12){
+    clasificacion = "B";
+    recomendacion = "Evaluar";
+}
+else{
+    clasificacion = "C";
+    recomendacion = "Evitar";
+}
+
+document.getElementById("resultado").innerText =
+`Clasificación: ${clasificacion} | Acción: ${recomendacion}`;
+
+let data = {
+    fecha: new Date().toISOString(),
+    cliente,
+    direccion,
+    telefono,
+    clasificacion,
+    score,
+    recomendacion,
+    factores: { interior, exterior, distancia, muro, electricidad, intervencion }
+};
+
+document.getElementById("json").innerText =
+JSON.stringify(data, null, 2);
+
+}
+</script>
+
+</body>
+</html>
