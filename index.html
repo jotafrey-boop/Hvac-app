@@ -107,34 +107,29 @@ if(score<=8){ clasificacion="A"; recomendacion="Tomar"; }
 else if(score<=12){ clasificacion="B"; recomendacion="Evaluar"; }
 else{ clasificacion="C"; recomendacion="Evitar"; }
 
-/* ===== ANALISIS AUTOMATICO ===== */
+/* ANALISIS */
 let analisis = [];
 
 if(distancia == 3){
   analisis.push("Distancia alta (>5m) → mayor carga de trabajo");
 }
-
 if(muro == 3){
   analisis.push("Muro estructural → perforación compleja");
 }
-
 if(electricidad == 3){
   analisis.push("Instalación eléctrica nueva requerida");
 }
-
 if(interior == 3){
   analisis.push("Condición interior difícil");
 }
-
 if(exterior == 3){
   analisis.push("Condición exterior difícil");
 }
-
 if(intervencion == 3){
   analisis.push("Alta intervención en infraestructura");
 }
 
-/* ===== RESULTADO ===== */
+/* RESULTADO */
 let textoAnalisis = analisis.length > 0 
   ? "\n\n" + analisis.map(a => "⚠️ " + a).join("\n")
   : "";
@@ -142,7 +137,7 @@ let textoAnalisis = analisis.length > 0
 document.getElementById("resultado").innerText =
 `Clasificación: ${clasificacion} (${score}) | Acción: ${recomendacion}${textoAnalisis}`;
 
-/* ===== GUARDADO ===== */
+/* DATA */
 let data = {
 fecha:new Date().toLocaleString(),
 cliente,direccion,telefono,
@@ -152,14 +147,26 @@ clasificacion,score,recomendacion,
 analisis: analisis.join(" | ")
 };
 
+/* GUARDADO LOCAL */
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
 registros.push(data);
 localStorage.setItem("registros", JSON.stringify(registros));
 
+/* ENVIO A GOOGLE SHEETS */
+fetch("https://script.google.com/macros/s/AKfycbwx7WJHFTGrIsTwAgLuy_o6vaXC356hce9ZVmJmqN0v96vxDqT0QzPvXKBBez8Nu-Im/exec", {
+  method: "POST",
+  body: JSON.stringify(data),
+  headers: {
+    "Content-Type": "application/json"
+  }
+})
+.then(res => console.log("Enviado a Google Sheets"))
+.catch(err => console.error("Error:", err));
+
 alert("Guardado ✔");
 }
 
-/* ===== VER REGISTROS ===== */
+/* VER REGISTROS */
 function verRegistros(){
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
 
@@ -181,7 +188,7 @@ ${r.clasificacion} (${r.score}) - ${r.recomendacion}<br>
 document.getElementById("lista").innerHTML = html;
 }
 
-/* ===== EXPORTAR ===== */
+/* EXPORTAR */
 function exportar(){
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
 
@@ -205,7 +212,7 @@ a.download = "registros_hvac.csv";
 a.click();
 }
 
-/* ===== BORRAR ===== */
+/* BORRAR */
 function borrarRegistros(){
 if(confirm("¿Seguro que quieres borrar todos los registros?")){
   localStorage.removeItem("registros");
