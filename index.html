@@ -110,24 +110,12 @@ else{ clasificacion="C"; recomendacion="Evitar"; }
 /* ANALISIS */
 let analisis = [];
 
-if(distancia == 3){
-  analisis.push("Distancia alta (>5m) → mayor carga de trabajo");
-}
-if(muro == 3){
-  analisis.push("Muro estructural → perforación compleja");
-}
-if(electricidad == 3){
-  analisis.push("Instalación eléctrica nueva requerida");
-}
-if(interior == 3){
-  analisis.push("Condición interior difícil");
-}
-if(exterior == 3){
-  analisis.push("Condición exterior difícil");
-}
-if(intervencion == 3){
-  analisis.push("Alta intervención en infraestructura");
-}
+if(distancia == 3) analisis.push("Distancia alta (>5m)");
+if(muro == 3) analisis.push("Muro estructural");
+if(electricidad == 3) analisis.push("Electricidad nueva");
+if(interior == 3) analisis.push("Interior difícil");
+if(exterior == 3) analisis.push("Exterior difícil");
+if(intervencion == 3) analisis.push("Alta intervención");
 
 /* RESULTADO */
 let textoAnalisis = analisis.length > 0 
@@ -155,13 +143,8 @@ localStorage.setItem("registros", JSON.stringify(registros));
 /* ENVIO A GOOGLE SHEETS */
 fetch("https://script.google.com/macros/s/AKfycbwx7WJHFTGrIsTwAgLuy_o6vaXC356hce9ZVmJmqN0v96vxDqT0QzPvXKBBez8Nu-Im/exec", {
   method: "POST",
-  body: JSON.stringify(data),
-  headers: {
-    "Content-Type": "application/json"
-  }
-})
-.then(res => console.log("Enviado a Google Sheets"))
-.catch(err => console.error("Error:", err));
+  body: JSON.stringify(data)
+});
 
 alert("Guardado ✔");
 }
