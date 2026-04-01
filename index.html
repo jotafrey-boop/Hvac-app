@@ -19,68 +19,33 @@ button { background:#1e3a8a; color:white; border:none; font-weight:bold; margin-
 
 <h2 style="text-align:center;">Frey Williams HVAC</h2>
 
-<div class="card">
-<label>Nombre Cliente</label>
-<input id="cliente">
-</div>
+<div class="card"><label>Nombre Cliente</label><input id="cliente"></div>
+<div class="card"><label>Dirección</label><input id="direccion"></div>
+<div class="card"><label>Teléfono</label><input id="telefono"></div>
+<div class="card"><label>Observaciones Cliente</label><textarea id="observaciones"></textarea></div>
+<div class="card"><label>Observación Técnica</label><textarea id="obs_tecnica"></textarea></div>
 
-<div class="card">
-<label>Dirección</label>
-<input id="direccion">
-</div>
+<div class="card"><label>Interior</label>
+<select id="interior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select></div>
 
-<div class="card">
-<label>Teléfono</label>
-<input id="telefono">
-</div>
+<div class="card"><label>Exterior</label>
+<select id="exterior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select></div>
 
-<div class="card">
-<label>Observaciones Cliente</label>
-<textarea id="observaciones"></textarea>
-</div>
+<div class="card"><label>Distancia</label>
+<select id="distancia"><option value="1"><3m</option><option value="2">3-5m</option><option value="3">>5m</option></select></div>
 
-<div class="card">
-<label>Observación Técnica</label>
-<textarea id="obs_tecnica"></textarea>
-</div>
+<div class="card"><label>Muro</label>
+<select id="muro"><option value="1">Simple</option><option value="2">Hormigón</option><option value="3">Estructural</option></select></div>
 
-<div class="card">
-<label>Interior</label>
-<select id="interior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select>
-</div>
+<div class="card"><label>Electricidad</label>
+<select id="electricidad"><option value="1">Lista</option><option value="2">Ajuste</option><option value="3">Nueva</option></select></div>
 
-<div class="card">
-<label>Exterior</label>
-<select id="exterior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select>
-</div>
-
-<div class="card">
-<label>Distancia</label>
-<select id="distancia"><option value="1"><3m</option><option value="2">3-5m</option><option value="3">>5m</option></select>
-</div>
-
-<div class="card">
-<label>Muro</label>
-<select id="muro"><option value="1">Simple</option><option value="2">Hormigón</option><option value="3">Estructural</option></select>
-</div>
-
-<div class="card">
-<label>Electricidad</label>
-<select id="electricidad"><option value="1">Lista</option><option value="2">Ajuste</option><option value="3">Nueva</option></select>
-</div>
-
-<div class="card">
-<label>Intervención</label>
-<select id="intervencion"><option value="1">Baja</option><option value="2">Media</option><option value="3">Alta</option></select>
-</div>
+<div class="card"><label>Intervención</label>
+<select id="intervencion"><option value="1">Baja</option><option value="2">Media</option><option value="3">Alta</option></select></div>
 
 <button onclick="evaluar()">Evaluar instalación</button>
-<button onclick="verRegistros()">Ver registros</button>
-<button onclick="exportar()">Exportar a Excel</button>
-<button onclick="borrarRegistros()" style="background:#c0392b;">Borrar registros</button>
 
 <div class="result" id="resultado"></div>
-<div class="registros" id="lista"></div>
 
 <script>
 function evaluar(){
@@ -100,108 +65,43 @@ let intervencion = +document.getElementById("intervencion").value;
 
 let score = interior+exterior+distancia+muro+electricidad+intervencion;
 
-let clasificacion = "";
-let recomendacion = "";
-
-if(score<=8){ clasificacion="A"; recomendacion="Tomar"; }
-else if(score<=12){ clasificacion="B"; recomendacion="Evaluar"; }
-else{ clasificacion="C"; recomendacion="Evitar"; }
+let clasificacion = score<=8 ? "A" : score<=12 ? "B" : "C";
+let recomendacion = score<=8 ? "Tomar" : score<=12 ? "Evaluar" : "Evitar";
 
 /* ANALISIS */
 let analisis = [];
-
-if(distancia == 3) analisis.push("Distancia alta (>5m)");
-if(muro == 3) analisis.push("Muro estructural");
-if(electricidad == 3) analisis.push("Electricidad nueva");
-if(interior == 3) analisis.push("Interior difícil");
-if(exterior == 3) analisis.push("Exterior difícil");
-if(intervencion == 3) analisis.push("Alta intervención");
-
-/* RESULTADO */
-let textoAnalisis = analisis.length > 0 
-  ? "\n\n" + analisis.map(a => "⚠️ " + a).join("\n")
-  : "";
+if(distancia==3) analisis.push("Distancia alta");
+if(muro==3) analisis.push("Muro estructural");
+if(electricidad==3) analisis.push("Electricidad nueva");
 
 document.getElementById("resultado").innerText =
-`Clasificación: ${clasificacion} (${score}) | Acción: ${recomendacion}${textoAnalisis}`;
+`Clasificación: ${clasificacion} (${score}) | ${recomendacion}`;
 
-/* DATA */
-let data = {
-fecha:new Date().toLocaleString(),
-cliente,direccion,telefono,
-observaciones,obs_tecnica,
-interior,exterior,distancia,muro,electricidad,intervencion,
-clasificacion,score,recomendacion,
-analisis: analisis.join(" | ")
-};
+/* ENVIO A GOOGLE SHEETS (FORMA ESTABLE) */
+let formData = new FormData();
 
-/* GUARDADO LOCAL */
-let registros = JSON.parse(localStorage.getItem("registros")) || [];
-registros.push(data);
-localStorage.setItem("registros", JSON.stringify(registros));
+formData.append("cliente", cliente);
+formData.append("direccion", direccion);
+formData.append("telefono", telefono);
+formData.append("observaciones", observaciones);
+formData.append("obs_tecnica", obs_tecnica);
+formData.append("interior", interior);
+formData.append("exterior", exterior);
+formData.append("distancia", distancia);
+formData.append("muro", muro);
+formData.append("electricidad", electricidad);
+formData.append("intervencion", intervencion);
+formData.append("clasificacion", clasificacion);
+formData.append("score", score);
+formData.append("recomendacion", recomendacion);
+formData.append("analisis", analisis.join(" | "));
 
-/* ENVIO A GOOGLE SHEETS */
 fetch("https://script.google.com/macros/s/AKfycbwx7WJHFTGrIsTwAgLuy_o6vaXC356hce9ZVmJmqN0v96vxDqT0QzPvXKBBez8Nu-Im/exec", {
   method: "POST",
-  body: JSON.stringify(data)
+  body: formData
 });
 
-alert("Guardado ✔");
-}
-
-/* VER REGISTROS */
-function verRegistros(){
-let registros = JSON.parse(localStorage.getItem("registros")) || [];
-
-if(registros.length === 0){
-  document.getElementById("lista").innerHTML = "Sin registros";
-  return;
-}
-
-let html = "";
-
-registros.slice().reverse().forEach(r=>{
-html += `<div style="border-bottom:1px solid #ddd; padding:5px;">
-<b>${r.cliente}</b><br>
-${r.clasificacion} (${r.score}) - ${r.recomendacion}<br>
-<i>${r.analisis || ""}</i>
-</div>`;
-});
-
-document.getElementById("lista").innerHTML = html;
-}
-
-/* EXPORTAR */
-function exportar(){
-let registros = JSON.parse(localStorage.getItem("registros")) || [];
-
-if(registros.length === 0){
-  alert("No hay datos");
-  return;
-}
-
-let csv = "Fecha,Cliente,Direccion,Telefono,Obs Cliente,Obs Tecnica,Interior,Exterior,Distancia,Muro,Electricidad,Intervencion,Clasificacion,Score,Recomendacion,Analisis\n";
-
-registros.forEach(r=>{
-  csv += `${r.fecha},${r.cliente},${r.direccion},${r.telefono},${r.observaciones},${r.obs_tecnica},${r.interior},${r.exterior},${r.distancia},${r.muro},${r.electricidad},${r.intervencion},${r.clasificacion},${r.score},${r.recomendacion},${r.analisis}\n`;
-});
-
-let blob = new Blob([csv], { type: 'text/csv' });
-let url = window.URL.createObjectURL(blob);
-
-let a = document.createElement("a");
-a.href = url;
-a.download = "registros_hvac.csv";
-a.click();
-}
-
-/* BORRAR */
-function borrarRegistros(){
-if(confirm("¿Seguro que quieres borrar todos los registros?")){
-  localStorage.removeItem("registros");
-  document.getElementById("lista").innerHTML = "";
-  alert("Registros eliminados ✔");
-}
+alert("Enviado ✔");
 }
 </script>
 
