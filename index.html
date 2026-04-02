@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Frey Williams HVAC</title>
 
+<!-- ICONO APP -->
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+
 <style>
 body {
   font-family: Arial;
@@ -165,45 +169,37 @@ document.getElementById("id_visita").value = generarID();
 /* EVALUAR */
 function evaluar(){
 
-let id_visita = document.getElementById("id_visita").value;
-let cliente = document.getElementById("cliente").value;
-let direccion = document.getElementById("direccion").value;
-let telefono = document.getElementById("telefono").value;
-let observaciones = document.getElementById("observaciones").value;
-let obs_tecnica = document.getElementById("obs_tecnica").value;
-
-let interior = +document.getElementById("interior").value;
-let exterior = +document.getElementById("exterior").value;
-let distancia = +document.getElementById("distancia").value;
-let muro = +document.getElementById("muro").value;
-let electricidad = +document.getElementById("electricidad").value;
-let intervencion = +document.getElementById("intervencion").value;
-
-let score = interior+exterior+distancia+muro+electricidad+intervencion;
-
-let clasificacion = score<=8 ? "A" : score<=12 ? "B" : "C";
-let recomendacion = score<=8 ? "Tomar" : score<=12 ? "Evaluar" : "Evitar";
-
 let data = {
-id_visita,
+id_visita: document.getElementById("id_visita").value,
 fecha:new Date().toLocaleString(),
-cliente,direccion,telefono,
-observaciones,obs_tecnica,
-interior,exterior,distancia,muro,electricidad,intervencion,
-clasificacion,score,recomendacion
+cliente: document.getElementById("cliente").value,
+direccion: document.getElementById("direccion").value,
+telefono: document.getElementById("telefono").value,
+observaciones: document.getElementById("observaciones").value,
+obs_tecnica: document.getElementById("obs_tecnica").value,
+interior: +document.getElementById("interior").value,
+exterior: +document.getElementById("exterior").value,
+distancia: +document.getElementById("distancia").value,
+muro: +document.getElementById("muro").value,
+electricidad: +document.getElementById("electricidad").value,
+intervencion: +document.getElementById("intervencion").value
 };
+
+data.score = data.interior+data.exterior+data.distancia+data.muro+data.electricidad+data.intervencion;
+data.clasificacion = data.score<=8 ? "A" : data.score<=12 ? "B" : "C";
+data.recomendacion = data.score<=8 ? "Tomar" : data.score<=12 ? "Evaluar" : "Evitar";
 
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
 registros.push(data);
 localStorage.setItem("registros", JSON.stringify(registros));
 
 document.getElementById("resultado").innerText =
-`ID: ${id_visita}
-Clasificación: ${clasificacion} (${score}) - ${recomendacion}`;
+`ID: ${data.id_visita}
+Clasificación: ${data.clasificacion} (${data.score}) - ${data.recomendacion}`;
 
 alert("Guardado ✔");
 
-/* GENERAR NUEVO ID */
+/* NUEVO ID */
 document.getElementById("id_visita").value = generarID();
 }
 
@@ -211,7 +207,8 @@ document.getElementById("id_visita").value = generarID();
 function verRegistros(){
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
 
-let html = "";
+let html = registros.length === 0 ? "Sin registros" : "";
+
 registros.slice().reverse().forEach(r=>{
 html += `<div style="border-bottom:1px solid #ddd; padding:5px;">
 <b>${r.id_visita} - ${r.cliente}</b><br>
@@ -219,7 +216,7 @@ ${r.clasificacion} (${r.score})
 </div>`;
 });
 
-document.getElementById("lista").innerHTML = html || "Sin registros";
+document.getElementById("lista").innerHTML = html;
 }
 
 /* EXPORTAR */
