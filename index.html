@@ -6,12 +6,51 @@
 <title>Frey Williams HVAC</title>
 
 <style>
-body { font-family: Arial; padding: 15px; background:#f5f7fa; }
-.card { background:white; padding:15px; border-radius:10px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-select, input, textarea, button { width:100%; padding:10px; margin-top:5px; }
-button { background:#1e3a8a; color:white; border:none; font-weight:bold; margin-top:10px;}
-.result { font-size:16px; margin-top:15px; font-weight:bold; white-space:pre-line;}
-.registros { background:white; padding:10px; margin-top:10px; border-radius:10px;}
+body {
+  font-family: Arial;
+  padding: 10px;
+  background:#f5f7fa;
+  max-width: 600px;
+  margin:auto;
+}
+
+.card {
+  background:white;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:10px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+select, input, textarea, button {
+  width:100%;
+  padding:12px;
+  margin-top:5px;
+  font-size:16px;
+}
+
+button {
+  background:#1e3a8a;
+  color:white;
+  border:none;
+  font-weight:bold;
+  margin-top:10px;
+  border-radius:8px;
+}
+
+.result {
+  font-size:16px;
+  margin-top:15px;
+  font-weight:bold;
+  white-space:pre-line;
+}
+
+.registros {
+  background:white;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+}
 </style>
 </head>
 
@@ -19,37 +58,114 @@ button { background:#1e3a8a; color:white; border:none; font-weight:bold; margin-
 
 <h2 style="text-align:center;">Frey Williams HVAC</h2>
 
-<div class="card"><label>Nombre Cliente</label><input id="cliente"></div>
-<div class="card"><label>Dirección</label><input id="direccion"></div>
-<div class="card"><label>Teléfono</label><input id="telefono"></div>
-<div class="card"><label>Observaciones Cliente</label><textarea id="observaciones"></textarea></div>
-<div class="card"><label>Observación Técnica</label><textarea id="obs_tecnica"></textarea></div>
+<div class="card">
+<label>ID Visita</label>
+<input id="id_visita" readonly>
+</div>
 
-<div class="card"><label>Interior</label>
-<select id="interior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select></div>
+<div class="card">
+<label>Nombre Cliente</label>
+<input id="cliente">
+</div>
 
-<div class="card"><label>Exterior</label>
-<select id="exterior"><option value="1">Fácil</option><option value="2">Media</option><option value="3">Difícil</option></select></div>
+<div class="card">
+<label>Dirección</label>
+<input id="direccion">
+</div>
 
-<div class="card"><label>Distancia</label>
-<select id="distancia"><option value="1"><3m</option><option value="2">3-5m</option><option value="3">>5m</option></select></div>
+<div class="card">
+<label>Teléfono</label>
+<input id="telefono">
+</div>
 
-<div class="card"><label>Muro</label>
-<select id="muro"><option value="1">Simple</option><option value="2">Hormigón</option><option value="3">Estructural</option></select></div>
+<div class="card">
+<label>Observaciones Cliente</label>
+<textarea id="observaciones"></textarea>
+</div>
 
-<div class="card"><label>Electricidad</label>
-<select id="electricidad"><option value="1">Lista</option><option value="2">Ajuste</option><option value="3">Nueva</option></select></div>
+<div class="card">
+<label>Observación Técnica</label>
+<textarea id="obs_tecnica"></textarea>
+</div>
 
-<div class="card"><label>Intervención</label>
-<select id="intervencion"><option value="1">Baja</option><option value="2">Media</option><option value="3">Alta</option></select></div>
+<div class="card">
+<label>Interior</label>
+<select id="interior">
+<option value="1">Fácil</option>
+<option value="2">Media</option>
+<option value="3">Difícil</option>
+</select>
+</div>
+
+<div class="card">
+<label>Exterior</label>
+<select id="exterior">
+<option value="1">Fácil</option>
+<option value="2">Media</option>
+<option value="3">Difícil</option>
+</select>
+</div>
+
+<div class="card">
+<label>Distancia</label>
+<select id="distancia">
+<option value="1"><3m</option>
+<option value="2">3-5m</option>
+<option value="3">>5m</option>
+</select>
+</div>
+
+<div class="card">
+<label>Muro</label>
+<select id="muro">
+<option value="1">Simple</option>
+<option value="2">Hormigón</option>
+<option value="3">Estructural</option>
+</select>
+</div>
+
+<div class="card">
+<label>Electricidad</label>
+<select id="electricidad">
+<option value="1">Lista</option>
+<option value="2">Ajuste</option>
+<option value="3">Nueva</option>
+</select>
+</div>
+
+<div class="card">
+<label>Intervención</label>
+<select id="intervencion">
+<option value="1">Baja</option>
+<option value="2">Media</option>
+<option value="3">Alta</option>
+</select>
+</div>
 
 <button onclick="evaluar()">Evaluar instalación</button>
+<button onclick="verRegistros()">Ver registros</button>
+<button onclick="exportar()">Exportar Excel</button>
+<button onclick="borrarRegistros()" style="background:#c0392b;">Borrar registros</button>
 
 <div class="result" id="resultado"></div>
+<div class="registros" id="lista"></div>
 
 <script>
+
+/* GENERAR ID AUTOMATICO */
+function generarID(){
+let fecha = new Date().toISOString().slice(0,10);
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+let numero = registros.length + 1;
+return `${fecha}-${numero}`;
+}
+
+document.getElementById("id_visita").value = generarID();
+
+/* EVALUAR */
 function evaluar(){
 
+let id_visita = document.getElementById("id_visita").value;
 let cliente = document.getElementById("cliente").value;
 let direccion = document.getElementById("direccion").value;
 let telefono = document.getElementById("telefono").value;
@@ -68,41 +184,79 @@ let score = interior+exterior+distancia+muro+electricidad+intervencion;
 let clasificacion = score<=8 ? "A" : score<=12 ? "B" : "C";
 let recomendacion = score<=8 ? "Tomar" : score<=12 ? "Evaluar" : "Evitar";
 
-/* ANALISIS */
-let analisis = [];
-if(distancia==3) analisis.push("Distancia alta");
-if(muro==3) analisis.push("Muro estructural");
-if(electricidad==3) analisis.push("Electricidad nueva");
+let data = {
+id_visita,
+fecha:new Date().toLocaleString(),
+cliente,direccion,telefono,
+observaciones,obs_tecnica,
+interior,exterior,distancia,muro,electricidad,intervencion,
+clasificacion,score,recomendacion
+};
+
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+registros.push(data);
+localStorage.setItem("registros", JSON.stringify(registros));
 
 document.getElementById("resultado").innerText =
-`Clasificación: ${clasificacion} (${score}) | ${recomendacion}`;
+`ID: ${id_visita}
+Clasificación: ${clasificacion} (${score}) - ${recomendacion}`;
 
-/* ENVIO A GOOGLE SHEETS (FORMA ESTABLE) */
-let formData = new FormData();
+alert("Guardado ✔");
 
-formData.append("cliente", cliente);
-formData.append("direccion", direccion);
-formData.append("telefono", telefono);
-formData.append("observaciones", observaciones);
-formData.append("obs_tecnica", obs_tecnica);
-formData.append("interior", interior);
-formData.append("exterior", exterior);
-formData.append("distancia", distancia);
-formData.append("muro", muro);
-formData.append("electricidad", electricidad);
-formData.append("intervencion", intervencion);
-formData.append("clasificacion", clasificacion);
-formData.append("score", score);
-formData.append("recomendacion", recomendacion);
-formData.append("analisis", analisis.join(" | "));
+/* GENERAR NUEVO ID */
+document.getElementById("id_visita").value = generarID();
+}
 
-fetch("https://script.google.com/macros/s/AKfycbwx7WJHFTGrIsTwAgLuy_o6vaXC356hce9ZVmJmqN0v96vxDqT0QzPvXKBBez8Nu-Im/exec", {
-  method: "POST",
-  body: formData
+/* VER REGISTROS */
+function verRegistros(){
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+
+let html = "";
+registros.slice().reverse().forEach(r=>{
+html += `<div style="border-bottom:1px solid #ddd; padding:5px;">
+<b>${r.id_visita} - ${r.cliente}</b><br>
+${r.clasificacion} (${r.score})
+</div>`;
 });
 
-alert("Enviado ✔");
+document.getElementById("lista").innerHTML = html || "Sin registros";
 }
+
+/* EXPORTAR */
+function exportar(){
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+
+if(registros.length === 0){
+  alert("No hay datos");
+  return;
+}
+
+let fecha = new Date().toISOString().slice(0,10);
+
+let csv = "ID,Fecha,Cliente,Direccion,Telefono,Obs Cliente,Obs Tecnica,Interior,Exterior,Distancia,Muro,Electricidad,Intervencion,Clasificacion,Score,Recomendacion\n";
+
+registros.forEach(r=>{
+  csv += `${r.id_visita},${r.fecha},${r.cliente},${r.direccion},${r.telefono},${r.observaciones},${r.obs_tecnica},${r.interior},${r.exterior},${r.distancia},${r.muro},${r.electricidad},${r.intervencion},${r.clasificacion},${r.score},${r.recomendacion}\n`;
+});
+
+let blob = new Blob([csv], { type: 'text/csv' });
+let url = window.URL.createObjectURL(blob);
+
+let a = document.createElement("a");
+a.href = url;
+a.download = `hvac_${fecha}.csv`;
+a.click();
+}
+
+/* BORRAR */
+function borrarRegistros(){
+if(confirm("¿Seguro que quieres borrar todos los registros?")){
+  localStorage.removeItem("registros");
+  document.getElementById("lista").innerHTML = "";
+  alert("Registros eliminados ✔");
+}
+}
+
 </script>
 
 </body>
